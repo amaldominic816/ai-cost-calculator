@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  
+  <title>AI Token & API Cost Estimator | Compare LLM Pricing</title>
+  <meta name="title" content="AI Token & API Cost Estimator | Compare LLM Pricing" />
+  <meta name="description" content="Calculate and compare real-world API token pricing across Claude 3.5 Sonnet, GPT-4o, DeepSeek-V3, and Gemini. Includes prompt caching and batch discount rates." />
+  <meta name="keywords" content="ai token calculator, llm api cost comparison, deepseek v3 pricing, gpt-4o token cost, claude prompt caching calculator, batch api pricing" />
+  <meta name="author" content="AI Cost Tools" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://yourusername.github.io/repo-name/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="AI Token & LLM API Cost Estimator" />
+  <meta property="og:description" content="Interactive multi-variable cost estimator for OpenAI, Anthropic, Google, and DeepSeek APIs with caching calculations." />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80" />
+  <meta property="twitter:card" content="summary_large_image" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AI Token Cost Estimator",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does prompt caching decrease API costs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Prompt caching allows developers to store static context like system prompts, long manuals, or previous conversation turns in GPU memory. Providers like Anthropic, OpenAI, and DeepSeek offer up to 50% to 90% discount on cached input tokens."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which LLM provider has the cheapest output tokens?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "DeepSeek-V3 and Gemini 2.0 Flash offer the most competitive token rates on the market, pricing output tokens under $0.50 per 1M tokens compared to standard frontier rates of $10 to $15 per 1M."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-surface: #111827;
+      --card-border: #1f293d;
+      --input-bg: #0b0f19;
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.15);
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.15);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    body { background: var(--bg); color: var(--text); line-height: 1.5; padding: 12px; }
+    .wrapper { max-width: 1040px; margin: 0 auto; padding-bottom: 40px; }
+
+    header { text-align: center; padding: 28px 12px 20px; }
+    .badge { display: inline-block; padding: 4px 12px; background: var(--primary-glow); border: 1px solid var(--primary); color: var(--primary); border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.75rem); font-weight: 800; letter-spacing: -0.02em; color: #ffffff; }
+    header p { color: var(--text-muted); font-size: clamp(0.95rem, 2vw, 1.1rem); max-width: 600px; margin: 8px auto 0; }
+
+    /* Responsive Adsterra Containers (prevents layout shift) */
+    .ad-slot {
+      width: 100%;
+      min-height: 90px;
+      margin: 20px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255,255,255,0.015);
+      border: 1px dashed var(--card-border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Preset Quick Buttons */
+    .presets { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px; }
+    .preset-btn { background: var(--card-surface); border: 1px solid var(--card-border); color: var(--text); padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; }
+    .preset-btn:hover { border-color: var(--primary); background: var(--primary-glow); }
+
+    /* Two-column layout on desktop, stacked on mobile */
+    .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 860px) {
+      .grid { grid-template-columns: 380px 1fr; align-items: start; }
+    }
+
+    .card { background: var(--card-surface); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 20px; }
+    .card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 16px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: #e5e7eb; margin-bottom: 6px; }
+    .input-wrap { position: relative; }
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease;
+    }
+    input[type="number"]:focus { outline: none; border-color: var(--primary); }
+    .input-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+    .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--card-border); cursor: pointer; }
+    .toggle-row input { width: 18px; height: 18px; accent-color: var(--primary); }
+    .toggle-row span { font-size: 0.85rem; font-weight: 500; }
+
+    /* Model Results List (Mobile-Optimized) */
+    .results-container { display: flex; flex-direction: column; gap: 10px; }
+    .model-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .model-card:hover { border-color: rgba(56, 189, 248, 0.4); }
+    .model-card.cheapest {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(16,185,129,0.06), var(--input-bg));
+    }
+    .model-info h3 { font-size: 0.95rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+    .tag-cheapest { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
+    .model-rates { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .model-cost { text-align: right; }
+    .cost-main { font-size: 1.15rem; font-weight: 800; color: #fff; }
+    .cost-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* SEO Article & FAQs */
+    .content-block { margin-top: 40px; padding: 24px; background: var(--card-surface); border: 1px solid var(--card-border); border-radius: var(--radius); }
+    .content-block h2 { font-size: 1.35rem; color: #fff; margin-bottom: 12px; }
+    .content-block p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px; }
+    .faq-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+    @media (min-width: 768px) { .faq-grid { grid-template-columns: 1fr 1fr; } }
+    .faq-box { background: var(--input-bg); border: 1px solid var(--card-border); padding: 16px; border-radius: 8px; }
+    .faq-box h3 { font-size: 0.95rem; color: #f3f4f6; margin-bottom: 6px; }
+    .faq-box p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <header>
+      <div class="badge">Inference Cost Benchmark</div>
+      <h1>AI Token & API Cost Estimator</h1>
+      <p>Compare real monthly API expenditures with prompt caching & batch discounting.</p>
+    </header>
+
+    <div class="ad-slot" id="ad-header">
+      <span>Adsterra Display Slot (728x90 / 320x50)</span>
+    </div>
+
+    <div class="presets">
+      <button class="preset-btn" onclick="applyPreset(50000, 800, 200, 30)">💬 Simple Chatbot</button>
+      <button class="preset-btn" onclick="applyPreset(20000, 6000, 500, 75)">📚 RAG Knowledge Base</button>
+      <button class="preset-btn" onclick="applyPreset(10000, 15000, 1200, 90)">📄 Long Document Digest</button>
+      <button class="preset-btn" onclick="applyPreset(100000, 2000, 300, 0)">⚡ Fast Micro-Agent</button>
+    </div>
+
+    <main class="grid">
+      <section class="card">
+        <h2>Parameters</h2>
+
+        <div class="form-group">
+          <label for="calls">Monthly Requests</label>
+          <div class="input-wrap">
+            <input type="number" id="calls" value="50000" step="1000" min="1" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputTokens">Input Tokens / Call</label>
+          <div class="input-wrap">
+            <input type="number" id="inputTokens" value="2000" step="100" min="0" />
+          </div>
+          <div class="input-hint">~1,500 words of context/instructions</div>
+        </div>
+
+        <div class="form-group">
+          <label for="outputTokens">Output Tokens / Call</label>
+          <div class="input-wrap">
+            <input type="number" id="outputTokens" value="400" step="50" min="0" />
+          </div>
+          <div class="input-hint">~300 words generated response</div>
+        </div>
+
+        <div class="form-group">
+          <label for="cacheRate">Context Cache Hit Rate (%)</label>
+          <div class="input-wrap">
+            <input type="number" id="cacheRate" value="50" min="0" max="100" />
+          </div>
+          <div class="input-hint">Shared system prompts & repeated sessions</div>
+        </div>
+
+        <label class="toggle-row">
+          <input type="checkbox" id="batchToggle" />
+          <span>Apply 50% Batch API Discount</span>
+        </label>
+      </section>
+
+      <section class="card">
+        <h2>
+          <span>Monthly Estimates</span>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">Sorted by price</span>
+        </h2>
+        <div class="results-container" id="resultsContainer">
+          </div>
+      </section>
+    </main>
+
+    <div class="ad-slot" id="ad-middle">
+      <span>Adsterra Native / Multi-Tag Container</span>
+    </div>
+
+    <article class="content-block">
+      <h2>How LLM API Pricing Formulas Work</h2>
+      <p>Language model APIs charge per one million tokens (1M tokens is roughly 750,000 English words). Total billing involves three critical components: input tokens, output tokens (which cost 3x to 5x more due to sequential generation overhead), and context cache hits.</p>
+      
+      <div class="faq-grid">
+        <div class="faq-box">
+          <h3>What is prompt caching?</h3>
+          <p>Prompt caching allows APIs like Anthropic, OpenAI, and DeepSeek to index large repetitive prompts. When the input matches, you get discounted reads that cost up to 90% less.</p>
+        </div>
+        <div class="faq-box">
+          <h3>Why use the Batch API?</h3>
+          <p>If your workload does not require instant millisecond responses, Batch endpoints queue jobs within a 24-hour SLA window in exchange for a flat 50% pricing cut across all tokens.</p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <script>
+    // Real-world rates per 1 Million Tokens ($)
+    const MODELS = [
+      { name: "DeepSeek-V3", input: 0.14, output: 0.28, cached: 0.014, batch: false },
+      { name: "Gemini 2.0 Flash", input: 0.10, output: 0.40, cached: 0.025, batch: true },
+      { name: "GPT-4o mini", input: 0.15, output: 0.60, cached: 0.075, batch: true },
+      { name: "DeepSeek-R1", input: 0.55, output: 2.19, cached: 0.14, batch: false },
+      { name: "Claude 3.5 Haiku", input: 0.80, output: 4.00, cached: 0.08, batch: true },
+      { name: "GPT-4o", input: 2.50, output: 10.00, cached: 1.25, batch: true },
+      { name: "Claude 3.5 Sonnet", input: 3.00, output: 15.00, cached: 0.30, batch: true }
+    ];
+
+    const callsEl = document.getElementById("calls");
+    const inputEl = document.getElementById("inputTokens");
+    const outputEl = document.getElementById("outputTokens");
+    const cacheEl = document.getElementById("cacheRate");
+    const batchEl = document.getElementById("batchToggle");
+    const container = document.getElementById("resultsContainer");
+
+    function updateUrlParams() {
+      const params = new URLSearchParams();
+      params.set('calls', callsEl.value);
+      params.set('in', inputEl.value);
+      params.set('out', outputEl.value);
+      params.set('cache', cacheEl.value);
+      if (batchEl.checked) params.set('batch', '1');
+      window.history.replaceState({}, '', `${location.pathname}?${params}`);
+    }
+
+    function readUrlParams() {
+      const p = new URLSearchParams(window.location.search);
+      if (p.has('calls')) callsEl.value = p.get('calls');
+      if (p.has('in')) inputEl.value = p.get('in');
+      if (p.has('out')) outputEl.value = p.get('out');
+      if (p.has('cache')) cacheEl.value = p.get('cache');
+      if (p.has('batch')) batchEl.checked = p.get('batch') === '1';
+    }
+
+    function calculate() {
+      const calls = Math.max(1, parseFloat(callsEl.value) || 0);
+      const input = parseFloat(inputEl.value) || 0;
+      const output = parseFloat(outputEl.value) || 0;
+      const cache = Math.min(100, Math.max(0, parseFloat(cacheEl.value) || 0)) / 100;
+      const isBatch = batchEl.checked;
+
+      container.innerHTML = "";
+
+      let evaluated = MODELS.map(m => {
+        const uncachedTokens = input * (1 - cache);
+        const cachedTokens = input * cache;
+
+        const inputCost = (uncachedTokens * (m.input / 1000000)) + (cachedTokens * (m.cached / 1000000));
+        const outputCost = output * (m.output / 1000000);
+
+        let perCall = inputCost + outputCost;
+        if (isBatch && m.batch) perCall *= 0.5;
+
+        return {
+          ...m,
+          perCall: perCall,
+          monthly: perCall * calls
+        };
+      });
+
+      evaluated.sort((a, b) => a.monthly - b.monthly);
+
+      evaluated.forEach((m, idx) => {
+        const isCheapest = idx === 0;
+        const card = document.createElement("div");
+        card.className = `model-card ${isCheapest ? 'cheapest' : ''}`;
+        
+        card.innerHTML = `
+          <div class="model-info">
+            <h3>
+              ${m.name}
+              ${isCheapest ? '<span class="tag tag-cheapest">Lowest Cost</span>' : ''}
+            </h3>
+            <div class="model-rates">
+              $${m.input}/M in · $${m.output}/M out ${m.batch && isBatch ? '· <strong style="color:var(--primary)">50% Off Batch</strong>' : ''}
+            </div>
+          </div>
+          <div class="model-cost">
+            <div class="cost-main">$${m.monthly.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div class="cost-sub">$${m.perCall.toFixed(4)} / request</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      updateUrlParams();
+    }
+
+    function applyPreset(calls, input, output, cache) {
+      callsEl.value = calls;
+      inputEl.value = input;
+      outputEl.value = output;
+      cacheEl.value = cache;
+      calculate();
+    }
+
+    [callsEl, inputEl, outputEl, cacheEl].forEach(input => input.addEventListener("input", calculate));
+    batchEl.addEventListener("change", calculate);
+
+    // Initial setup
+    readUrlParams();
+    calculate();
+  </script>
+</body>
+</html>
